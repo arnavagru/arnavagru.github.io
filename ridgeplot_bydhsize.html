@@ -30,7 +30,7 @@ Composite Score by Size of District Hospital
 // set the dimensions and margins of the graph
 var margin = {top: 120, right: 30, bottom: 50, left:200},
     width = 760 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
+    height = 337 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
 var svg = d3.select("#ridgeplot_bydhsize")
@@ -49,25 +49,46 @@ d3.csv("https://raw.githubusercontent.com/arnavagru/nitihealthydistricts/master/
   var n = categories.length
 
   // Compute the mean of each group
-  allMeans = []
+  var allMeans = {}
+  var values={}
+  var occurences={}
   for (i in categories){
     currentGroup = categories[i]
-    mean = d3.mean(data, function(d) { return +d[currentGroup] })
-    allMeans.push(mean)
+    occurences[currentGroup]=0
+    values[currentGroup]=0
+    for (element in data)
+    {
+      
+      if (data[element][currentGroup] != undefined && data[element][currentGroup] != ""){
+        values[currentGroup] +=parseFloat(data[element][currentGroup])
+        occurences[currentGroup] +=1
+      }
+    }
+    allMeans[currentGroup]=values[currentGroup]/occurences[currentGroup]
   }
 
+  allMeans_list=[]
+  for(var key in allMeans) {
+  var value = allMeans[key];
+  allMeans_list.push(value)
+}
+
   var colors = d3.scaleOrdinal()
-    .domain(["Mid-sized (Between 200 and 300 beds)","Large (More than 300 beds)","Small (Less than 200 beds)"])
-    .range(["#DAF7A6", "#FFC300", "#FF5733"])
+    .domain(["Large (More than 300 beds)","Mid-sized (Between 200 and 300 beds)", "Small (Less than 200 beds)"])
+    .range(["#b1e5d7", "#33aec0", "#1a5989"])
 
   // Add X axis
   var x = d3.scaleLinear()
-    .domain([-10, 120])
-    .range([ 0, width ]);
+    .domain([7, 50])
+    .range([ 35, width ]);
+  var x1 =d3.scaleLinear()
+    .domain([7, 50])
+    .range([ 35, width ]);
+
   svg.append("g")
     .attr("class", "xAxis")
     .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x).tickValues([0,25, 50, 75, 100]).tickSize(-height) )
+    .call(d3.axisBottom(x1).tickValues([10,20, 30, 40, 50]).tickSize(-height) )
     .select(".domain").remove()
 
   // Add X axis label:
@@ -79,7 +100,7 @@ d3.csv("https://raw.githubusercontent.com/arnavagru/nitihealthydistricts/master/
 
   // Create a Y scale for densities
   var y = d3.scaleLinear()
-    .domain([0, 0.25])
+    .domain([0, 0.12])
     .range([ height, 0]);
 
   // Create the Y axis for names
@@ -98,6 +119,7 @@ d3.csv("https://raw.githubusercontent.com/arnavagru/nitihealthydistricts/master/
       key = categories[i]
       density = kde( data.map(function(d){  return d[key]; }) )
       allDensity.push({key: key, density: density})
+      
   }
 
   // Add areas
@@ -110,7 +132,7 @@ d3.csv("https://raw.githubusercontent.com/arnavagru/nitihealthydistricts/master/
         return colors(d.key);
       })
       .datum(function(d){return(d.density)})
-      .attr("opacity", 0.4)
+      .attr("opacity", 1)
       .attr("stroke", "#000")
       .attr("stroke-width", 0.1)
       .attr("d",  d3.line()
@@ -118,7 +140,6 @@ d3.csv("https://raw.githubusercontent.com/arnavagru/nitihealthydistricts/master/
           .x(function(d) { return x(d[0]); })
           .y(function(d) { return y(d[1]); })
       )
-
 })
 
 // This is what I need to compute kernel density estimation
@@ -134,5 +155,6 @@ function kernelEpanechnikov(k) {
     return Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
   };
 }
+
 
 </script>

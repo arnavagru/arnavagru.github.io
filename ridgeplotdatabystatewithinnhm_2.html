@@ -50,25 +50,43 @@ d3.csv("https://raw.githubusercontent.com/arnavagru/nitihealthydistricts/master/
   var n = categories.length
 
   // Compute the mean of each group
-  allMeans = []
+  var allMeans = {}
+  var values={}
+  var occurences={}
   for (i in categories){
     currentGroup = categories[i]
-    mean = d3.mean(data, function(d) { return +d[currentGroup] })
-    allMeans.push(mean)
+    occurences[currentGroup]=0
+    values[currentGroup]=0
+    for (element in data)
+    {
+      
+      if (data[element][currentGroup] != undefined && data[element][currentGroup] != ""){
+        values[currentGroup] +=parseFloat(data[element][currentGroup])
+        occurences[currentGroup] +=1
+      }
+    }
+    allMeans[currentGroup]=values[currentGroup]/occurences[currentGroup]
   }
 
+  allMeans_list=[]
+  for(var key in allMeans) {
+  var value = allMeans[key];
+  allMeans_list.push(value)
+}
+
   var colors = d3.scaleOrdinal()
-    .domain(["Rajasthan", "Madhya Pradesh", "Himachal Pradesh", "Odisha", "Jammu & Kashmir", "Chhattisgarh", "Bihar", "Uttar Pradesh", "Jharkhand", "Uttarakhand"])
-    .range(["#DAF7A6", "#FFC300", "#FF5733", "#DAF7A6", "#FFC300", "#FF5733", "#DAF7A6", "#FFC300", "#FF5733", "#DAF7A6"])
+    .domain(["Rajasthan", "Himachal Pradesh", "Madhya Pradesh", "Odisha", "Jammu & Kashmir", "Chhattisgarh", "Bihar", "Uttar Pradesh", "Jharkhand", "Uttarakhand"])
+    .range(["#ffa222", "#ff980f", "#ff8d00", "#ff8200", "#ff6b00", "#fa6200", "#e55100", "#d04502", "#c6420a", "#aa3414"])
 
   // Add X axis
-  var x = d3.scaleLinear()
-    .domain([-10, 120])
-    .range([ 0, width ]);
-  svg.append("g")
+  var x= d3.scaleLinear()
+    .domain([7, 50])
+    .range([ 15, width ]);
+
+    svg.append("g")
     .attr("class", "xAxis")
     .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x).tickValues([0,25, 50, 75, 100]).tickSize(-height) )
+    .call(d3.axisBottom(x).tickValues([10, 20, 30, 40, 50]).tickSize(-height) )
     .select(".domain").remove()
 
   // Add X axis label:
@@ -80,7 +98,7 @@ d3.csv("https://raw.githubusercontent.com/arnavagru/nitihealthydistricts/master/
 
   // Create a Y scale for densities
   var y = d3.scaleLinear()
-    .domain([0, 0.25])
+    .domain([0, 0.30])
     .range([ height, 0]);
 
   // Create the Y axis for names
@@ -111,7 +129,7 @@ d3.csv("https://raw.githubusercontent.com/arnavagru/nitihealthydistricts/master/
         return colors(d.key);
       })
       .datum(function(d){return(d.density)})
-      .attr("opacity", 0.4)
+      .attr("opacity", 1)
       .attr("stroke", "#000")
       .attr("stroke-width", 0.1)
       .attr("d",  d3.line()

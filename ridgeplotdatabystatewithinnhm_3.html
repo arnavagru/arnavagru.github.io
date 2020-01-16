@@ -48,26 +48,46 @@ d3.csv("https://raw.githubusercontent.com/arnavagru/nitihealthydistricts/master/
   var n = categories.length
 
   // Compute the mean of each group
-  allMeans = []
+  var allMeans = {}
+  var values={}
+  var occurences={}
   for (i in categories){
     currentGroup = categories[i]
-    mean = d3.mean(data, function(d) { return +d[currentGroup] })
-    allMeans.push(mean)
+    occurences[currentGroup]=0
+    values[currentGroup]=0
+    for (element in data)
+    {
+      
+      if (data[element][currentGroup] != undefined && data[element][currentGroup] != ""){
+        values[currentGroup] +=parseFloat(data[element][currentGroup])
+        occurences[currentGroup] +=1
+      }
+    }
+    allMeans[currentGroup]=values[currentGroup]/occurences[currentGroup]
   }
 
+  allMeans_list=[]
+  for(var key in allMeans) {
+  var value = allMeans[key];
+  allMeans_list.push(value)
+}
+
   var colors = d3.scaleOrdinal()
-    .domain(["Andhra Pradesh","Goa", "Haryana", "Telangana", "West Bengal", "Tamil Nadu", "Karnataka", "Maharashtra", "Punjab", "Kerala", "Gujarat"])
-    .range(["#DAF7A6", "#FFC300", "#FF5733", "#DAF7A6", "#FFC300", "#FF5733", "#DAF7A6", "#FFC300", "#FF5733", "#DAF7A6", "#FFC300"])
+    .domain(["Kerala", "Gujarat", "Punjab", "Maharashtra","Karnataka", "West Bengal", "Haryana", "Tamil Nadu", "Telangana", "Goa", "Andhra Pradesh"])
+    .range(["#006b38", "#007835", "#00863b", "#0c9244", "#2b9f46", "#42ac49", "#52b957", "#63c665", "#6dcd6c", "#84d97d", "#a6e2a0"])
 
   // Add X axis
-  var x = d3.scaleLinear()
-    .domain([-10, 120])
-    .range([ 0, width ]);
-  svg.append("g")
+
+  var x= d3.scaleLinear()
+    .domain([7, 50])
+    .range([ 15, width ]);
+
+    svg.append("g")
     .attr("class", "xAxis")
     .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x).tickValues([0,25, 50, 75, 100]).tickSize(-height) )
+    .call(d3.axisBottom(x).tickValues([10, 20, 30, 40, 50]).tickSize(-height) )
     .select(".domain").remove()
+
 
   // Add X axis label:
   svg.append("text")
@@ -109,7 +129,7 @@ d3.csv("https://raw.githubusercontent.com/arnavagru/nitihealthydistricts/master/
         return colors(d.key);
       })
       .datum(function(d){return(d.density)})
-      .attr("opacity", 0.4)
+      .attr("opacity", 1)
       .attr("stroke", "#000")
       .attr("stroke-width", 0.1)
       .attr("d",  d3.line()
